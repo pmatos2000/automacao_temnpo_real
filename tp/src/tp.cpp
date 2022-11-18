@@ -12,7 +12,7 @@ int main() {
 	{
 		cout << m1.get_velocidade_atual() << endl;
 		sleep(1);
-		m1.atualizar(12);
+		m1.atualizar(1);
 
 	}
 	return 0;

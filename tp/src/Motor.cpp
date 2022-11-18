@@ -4,7 +4,7 @@
 
 
 const double Ra = 7.2; // Resistência da amadura
-const double La = 3.4e-6; // Indutancia amadura
+const double La = 3.4e-3; // Indutancia amadura
 const double Km = 13.15e-3; // Constante de toque
 const double tal_L = 0; // Pertubação
 const double Jm = 4.5e-7; // Momento de inércia
@@ -59,6 +59,15 @@ void Motor::atualizar(double tensao_entrada)
 	double k1_toque = derivada_toque(toque_atual, velocidade_atual, tensao_entrada);
 	double k1_velocidade = derivada_velocidade(toque_atual, velocidade_atual);
 
+	toque_atual = toque_atual + delta_t * k1_toque;
+	velocidade_atual = velocidade_atual + delta_t * k1_velocidade;
+	tempo_ultima_atualizacao = tempo;
+
+	/*
+
+	double k1_toque = derivada_toque(toque_atual, velocidade_atual, tensao_entrada);
+	double k1_velocidade = derivada_velocidade(toque_atual, velocidade_atual);
+
 	double toque_aux =  toque_atual + 0.5 * delta_t * k1_toque;
 	double velocidade_aux = velocidade_atual + 0.5 * delta_t * k1_velocidade;
 	double k2_toque = derivada_toque(toque_aux, toque_aux, tensao_entrada);
@@ -77,5 +86,6 @@ void Motor::atualizar(double tensao_entrada)
 	toque_atual += delta_t * (k1_toque + 2 * k2_toque + 2 * k3_toque + k4_toque)/6;
 	velocidade_atual += delta_t * (k1_velocidade + 2 * k2_velocidade + 2 * k3_velocidade + k4_velocidade)/6;
 	tempo_ultima_atualizacao = tempo;
+	*/
 
 }
