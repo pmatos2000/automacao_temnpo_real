@@ -29,11 +29,6 @@ Motor::Motor()
 	tempo_ultima_atualizacao = obter_tempo();
 }
 
-void Motor::set_velocidade_referencia(double velocidade_referencia)
-{
-	this->velocidade_referencia = velocidade_referencia;
-}
-
 double Motor::get_velocidade_atual()
 {
 	return velocidade_atual;
