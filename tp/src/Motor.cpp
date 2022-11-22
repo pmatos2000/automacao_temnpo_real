@@ -1,6 +1,7 @@
 #include <chrono>
 #include <thread>
 #include "Motor.hpp"
+#include <iostream>
 
 
 const double Ra = 7.2; // Resistência da amadura
@@ -11,12 +12,13 @@ const double Jm = 4.5e-7; // Momento de inércia
 const double B = 3.95e-5; // Atrito viscoso
 const double Kb = 0.0132; //Constante elétrica
 
+
 using namespace std::chrono;
 
 
 double obter_tempo()
 {
-	return duration_cast<milliseconds>(
+	return duration_cast<microseconds>(
 			system_clock::now().time_since_epoch()
 		).count() ;
 }
@@ -40,7 +42,7 @@ double Motor::get_velocidade_atual()
 double derivada_toque(double tal_m, double wm, double V)
 {
 
-	return (Km * V - Km * Kb * wm - Ra*tal_m)/La;
+	return (Km * V - Km * Kb * wm - Ra*tal_m);
 }
 
 double derivada_velocidade(double tal_m, double wm)
@@ -54,7 +56,9 @@ void Motor::atualizar(double tensao_entrada)
 {
 	double tempo =  obter_tempo();
 
-	double delta_t = (tempo - tempo_ultima_atualizacao)/1000;
+	double delta_t = (tempo - tempo_ultima_atualizacao)/1e6;
+	
+	std::cout << "tempo: " << delta_t << std::endl;
 
 	double k1_toque = derivada_toque(toque_atual, velocidade_atual, tensao_entrada);
 	double k1_velocidade = derivada_velocidade(toque_atual, velocidade_atual);
@@ -62,6 +66,9 @@ void Motor::atualizar(double tensao_entrada)
 	toque_atual = toque_atual + delta_t * k1_toque;
 	velocidade_atual = velocidade_atual + delta_t * k1_velocidade;
 	tempo_ultima_atualizacao = tempo;
+
+	std::cout << "velocidade: " << velocidade_atual << std::endl;
+	std::cout << "toque: " << toque_atual << std::endl;
 
 	/*
 
