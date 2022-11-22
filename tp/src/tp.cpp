@@ -8,11 +8,11 @@ using namespace std;
 int main() {
 	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
 	Motor m1 = Motor();
-	for(int i = 0; i  < 10000000; i++)
+	for(int i = 0; i  < 1000; i++)
 	{
-		cout << m1.get_velocidade_atual() << endl;
-		sleep(1);
-		m1.atualizar(1);
+ 		double v = m1.atualizar_velocidade(12);
+		cout << "velocidade: " << v << endl;
+		usleep(500);
 
 	}
 	return 0;

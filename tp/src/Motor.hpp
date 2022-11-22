@@ -12,7 +12,7 @@ class Motor
 	public:
 		void set_velocidade_referencia(double velocidade_referencia);
 		double get_velocidade_atual();
-		void atualizar(double tensao_entrada);
+		double atualizar_velocidade(double tensao_entrada);
 		Motor();
 };
 

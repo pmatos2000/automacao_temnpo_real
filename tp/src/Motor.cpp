@@ -52,7 +52,7 @@ double derivada_velocidade(double tal_m, double wm)
 
 
 
-void Motor::atualizar(double tensao_entrada)
+double Motor::atualizar_velocidade(double tensao_entrada)
 {
 	double tempo =  obter_tempo();
 
@@ -69,6 +69,8 @@ void Motor::atualizar(double tensao_entrada)
 
 	std::cout << "velocidade: " << velocidade_atual << std::endl;
 	std::cout << "toque: " << toque_atual << std::endl;
+
+	return velocidade_atual;
 
 	/*
 
