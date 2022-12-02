@@ -3,10 +3,8 @@
 #include <vector>
 #include <fstream>
 
-
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
-
 
 #include "Motor.hpp"
 #include "Controlador.hpp"
@@ -33,6 +31,7 @@ using namespace std;
 static vector<Motor> motores(30);
 static vector<Controlador> controladores(30);
 
+boost::asio::io_context contexto;
 
 void simular_motor(boost::system::error_code /*e*/, boost::asio::steady_timer* temporizador, int index_motor, double tempo_ultima_atualizacao)
 {
@@ -85,10 +84,31 @@ void log_dados(boost::system::error_code /*e*/, boost::asio::steady_timer* tempo
 	temporizador->async_wait(boost::bind(log_dados, boost::asio::placeholders::error, temporizador, arquivo, tempo_inicial));
 }
 
+void interface()
+{
+	int id_motor;
+	double velocidade_maxima;
+	while (true)
+	{
+		cout << "Entre com o ID do Motor (0..31) e com a Velocidade" << endl;
+		cout << "Informando o ID = -1 o programa finaliza" << endl;
 
-int main(void) {
+		cin >> id_motor;
+		if (id_motor < 0)
+		{
+			contexto.stop();
+			return;
+		}
 
-	boost::asio::io_context contexto;
+		cin >> velocidade_maxima;
+		velocidade_maxima = velocidade_maxima < 0 ? 0 : velocidade_maxima;
+	}
+	
+}
+
+
+int main(void)
+{
 	vector<boost::asio::steady_timer*> lista_temporizador;
 
 	boost::asio::steady_timer* temporizador = 0;
@@ -108,19 +128,26 @@ int main(void) {
 		controladores[2*i+1].set_velocidade_referencia(VELOCIDADE_INICIAL);
 	}
 	
-
-
 	temporizador = new boost::asio::steady_timer(contexto, TEMPO_ATUALIZAR_CONTROLE);
 	temporizador->async_wait(boost::bind(atualizar_tensao_controle, boost::asio::placeholders::error, temporizador));
-
-
 
 	ofstream arquivo("log.txt");
 	temporizador = new boost::asio::steady_timer(contexto, TEMPO_ESCREVER_LOG);
 	temporizador->async_wait(boost::bind(log_dados, boost::asio::placeholders::error, temporizador, &arquivo, tempo_inicial));
 	lista_temporizador.push_back(temporizador);
 
+	thread interface_thead(interface);
+	interface_thead.join();
+	
 	contexto.run();
+
+
+	arquivo.close();
+	for(auto &t: lista_temporizador)
+	{
+		delete t;
+	}
+	lista_temporizador.clear();
 
 	return 0;
 }
