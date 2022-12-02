@@ -10,3 +10,8 @@ double Util::obter_tempo()
         system_clock::now().time_since_epoch()
 	).count() ;
 }
+
+double Util::calcular_delta_tempo(double inicio, double fim)
+{
+    return (fim - inicio) / 1e6;
+}

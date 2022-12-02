@@ -42,20 +42,17 @@ double derivada_velocidade(double tal_m, double wm)
 
 
 
-double Motor::atualizar_velocidade(double tensao_entrada)
+double Motor::atualizar_velocidade(double delta_tempo, double tensao_entrada)
 {
-	double tempo =  Util::obter_tempo();
 
-	double delta_t = (tempo - tempo_ultima_atualizacao)/1e6;
 	
 	// std::cout << "tempo: " << delta_t << std::endl;
 
 	double k1_toque = derivada_toque(toque_atual, velocidade_atual, tensao_entrada);
 	double k1_velocidade = derivada_velocidade(toque_atual, velocidade_atual);
 
-	toque_atual = toque_atual + delta_t * k1_toque;
-	velocidade_atual = velocidade_atual + delta_t * k1_velocidade;
-	tempo_ultima_atualizacao = tempo;
+	toque_atual = toque_atual + delta_tempo * k1_toque;
+	velocidade_atual = velocidade_atual + delta_tempo * k1_velocidade;
 
 	// std::cout << "velocidade: " << velocidade_atual << std::endl;
 	// std::cout << "toque: " << toque_atual << std::endl;

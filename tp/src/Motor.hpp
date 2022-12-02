@@ -7,6 +7,6 @@ class Motor
 
 	public:
 		double get_velocidade_atual();
-		double atualizar_velocidade(double tensao_entrada);
+		double atualizar_velocidade(double delta_tempo, double tensao_entrada);
 		Motor();
 };

@@ -13,3 +13,8 @@ double Controlador::atualizar_tensao(double valor_medido)
     tensao_atual = nova_tensao;
     return nova_tensao;
 }
+
+double Controlador::obter_tensao_atual()
+{
+    return tensao_atual;
+}
