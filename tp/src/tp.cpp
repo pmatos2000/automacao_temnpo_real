@@ -26,7 +26,7 @@ const auto TEMPO_SIMULAR_MOTOR = boost::asio::chrono::milliseconds(10);
 const auto TEMPO_ESCREVER_LOG = boost::asio::chrono::seconds(1);
 const auto TEMPO_ATUALIZAR_CONTROLE = boost::asio::chrono::milliseconds(200);
 
-const double VELOCIDADE_INICIAL = 500;
+const double VELOCIDADE_INICIAL = 300;
 
 using namespace std;
 
@@ -48,7 +48,7 @@ void simular_motor(boost::system::error_code /*e*/, boost::asio::steady_timer* t
 	temporizador->expires_at(temporizador->expiry() + TEMPO_SIMULAR_MOTOR);
 	temporizador->async_wait(boost::bind(simular_motor, boost::asio::placeholders::error, temporizador, index_motor, tempo_atual));
 
-	cout << index_motor << " " << delta_tempo  << " " << motores[index_motor].get_velocidade_atual() << endl;
+	// cout << index_motor << " " << delta_tempo  << " " << motores[index_motor].get_velocidade_atual() << endl;
 }
 
 
@@ -66,14 +66,15 @@ void atualizar_tensao_controle(boost::system::error_code /*e*/, boost::asio::ste
 }
 
 
-//Tem que tornar essa escrita async
-//Criar um buff pra salvar melhor os dados
 void log_dados(boost::system::error_code /*e*/, boost::asio::steady_timer* temporizador, ofstream *arquivo, double tempo_inicial)
 {
+	//ADICIONAR UM BLOQUEIO PARA ESSE MÈTODO SÒ EXECUTAR SE ELE NÂO TIVER EM EXECUCAO
 	//ADICIONAR RESTRICAO DE ESPERAR TODOS MOTORES ESPERAR
-
+	
 	const double tempo_atual = Util::obter_tempo();
 	const double delta_tempo =  Util::calcular_delta_tempo(tempo_inicial, tempo_atual);
+
+	stringstream ss;
 
 	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
 	{
