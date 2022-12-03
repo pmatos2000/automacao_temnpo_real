@@ -77,8 +77,10 @@ void log_dados(boost::system::error_code /*e*/, boost::asio::steady_timer* tempo
 
 	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
 	{
-			(*arquivo) << i << ' ' << delta_tempo << ' ' << motores[i].get_velocidade_atual() << endl;
+			ss << i << ' ' << delta_tempo << ' ' << motores[i].get_velocidade_atual() << endl;
 	}
+
+	(*arquivo) << ss.rdbuf();
 
 	temporizador->expires_at(temporizador->expiry() + TEMPO_ESCREVER_LOG);
 	temporizador->async_wait(boost::bind(log_dados, boost::asio::placeholders::error, temporizador, arquivo, tempo_inicial));
@@ -136,9 +138,7 @@ int main(void)
 	temporizador->async_wait(boost::bind(log_dados, boost::asio::placeholders::error, temporizador, &arquivo, tempo_inicial));
 	lista_temporizador.push_back(temporizador);
 
-	thread interface_thead(interface);
-	interface_thead.join();
-	
+	thread interface_thead(interface);	
 	contexto.run();
 
 

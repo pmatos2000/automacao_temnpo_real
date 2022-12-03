@@ -3,8 +3,6 @@
 #include <iostream>
 
 #include "Motor.hpp"
-#include "Util.hpp"
-
 
 const double Ra = 7.2; // Resistência da amadura
 const double La = 3.4e-3; // Indutancia amadura
@@ -13,16 +11,6 @@ const double tal_L = 0; // Pertubação
 const double Jm = 4.5e-7; // Momento de inércia
 const double B = 3.95e-5; // Atrito viscoso
 const double Kb = 0.0132; //Constante elétrica
-
-
-using namespace std::chrono;
-
-
-
-Motor::Motor()
-{
-	tempo_ultima_atualizacao = Util::obter_tempo();
-}
 
 double Motor::get_velocidade_atual()
 {

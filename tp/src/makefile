@@ -3,7 +3,7 @@ all: tp.bin clean
 tp.bin: tp.cpp motor.o controlador.o util.o
 	g++ tp.cpp motor.o controlador.o util.o -o tp.bin -std=c++14 -pthread -lboost_system -lboost_date_time -lboost_thread
 
-motor.o: Motor.cpp Motor.hpp util.o
+motor.o: Motor.cpp Motor.hpp
 	g++ Motor.cpp -o motor.o -c -W -Wall -ansi -pedantic -std=c++14
 
 controlador.o: Controlador.cpp Controlador.hpp
