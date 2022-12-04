@@ -8,7 +8,6 @@ struct DadosMensagem
     double velocidade_maxima;
 };
 
-//Adicionar multex para evitar escrita e leitura ao mesmo tempo
 class CaixaMensagem
 {
     private:
