@@ -10,6 +10,7 @@
 #include "Motor.hpp"
 #include "Controlador.hpp"
 #include "Util.hpp"
+#include "CaixaMensagem.hpp"
 
 
 
@@ -30,9 +31,11 @@ using namespace std;
 
 static vector<Motor> motores(30);
 static vector<Controlador> controladores(30);
+static CaixaMensagem caixa_mensagem;
 
 mutex mtx_dados_motores;
 mutex mtx_dados_controladores;
+mutex mtx_caixa_mensagem;
 
 boost::asio::io_context contexto;
 
@@ -58,7 +61,6 @@ void simular_motor(boost::system::error_code /*e*/, boost::asio::steady_timer* t
 	temporizador->expires_at(temporizador->expiry() + TEMPO_SIMULAR_MOTOR);
 	temporizador->async_wait(boost::bind(simular_motor, boost::asio::placeholders::error, temporizador, index_motor, tempo_atual));
 
-
 	// cout << index_motor << " " << delta_tempo  << " " << motores[index_motor].get_velocidade_atual() << endl;
 }
 
@@ -67,6 +69,37 @@ void atualizar_tensao_controle(boost::system::error_code /*e*/, boost::asio::ste
 {
 	mtx_dados_motores.lock();
 	mtx_dados_controladores.lock();
+
+	int quantidade_controles_usados = 0;
+	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
+	{
+		if(controladores[i].verificar_controle_ativo()) quantidade_controles_usados++;
+	}
+	int quantidade_controles_livres = 12 - quantidade_controles_usados;
+
+	mtx_caixa_mensagem.lock();
+	while(quantidade_controles_livres > 0)
+	{
+		DadosMensagem dados_mensagem;
+		bool leitura_sucesso = caixa_mensagem.ler_mensagem_topo(dados_mensagem);
+		
+		if(leitura_sucesso == false) break;
+		// cout << "Executadno o comando: "<<  dados_mensagem.id_motor << " " << dados_mensagem.velocidade_maxima << endl;
+
+		if( (dados_mensagem.id_motor == 0 && controladores[dados_mensagem.id_motor+1].verificar_controle_ativo())
+		  || (dados_mensagem.id_motor == QUANTIDADE_MOTORES - 1 && controladores[dados_mensagem.id_motor-1].verificar_controle_ativo())
+		  || (controladores[dados_mensagem.id_motor-1].verificar_controle_ativo() || controladores[dados_mensagem.id_motor+1].verificar_controle_ativo()))
+		{
+			// cout << "Falha ao executar o comando" << endl;
+			break;
+		}
+
+		controladores[dados_mensagem.id_motor].set_velocidade_referencia(dados_mensagem.velocidade_maxima/2);
+		caixa_mensagem.remover_mensagem_topo();
+		quantidade_controles_livres--;
+	}
+	mtx_caixa_mensagem.unlock();
+
 	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
 	{
 		double tensao_atual =  motores[i].get_velocidade_atual();
@@ -111,11 +144,11 @@ void interface()
 	double velocidade_maxima;
 	while (true)
 	{
-		cout << "Entre com o ID do Motor (0..31) e com a Velocidade" << endl;
-		cout << "Informando o ID = -1 o programa finaliza" << endl;
+		cout << "Entre com o ID do Motor (0..29) e com a Velocidade" << endl;
+		cout << "Informando o ID = -1 ou ID > 29 o programa finaliza" << endl;
 
 		cin >> id_motor;
-		if (id_motor < 0)
+		if (id_motor < 0 || id_motor > 29)
 		{
 			contexto.stop();
 			return;
@@ -123,8 +156,13 @@ void interface()
 
 		cin >> velocidade_maxima;
 		velocidade_maxima = velocidade_maxima < 0 ? 0 : velocidade_maxima;
+
+		mtx_caixa_mensagem.lock();
+		caixa_mensagem.adicionar_mensagem(id_motor, velocidade_maxima);
+		mtx_caixa_mensagem.unlock();
+
+		cout << "Comando registrado com sucesso!" << endl;
 	}
-	
 }
 
 
@@ -142,11 +180,13 @@ int main(void)
 		lista_temporizador.push_back(temporizador);
 	}
 	
+	/*
 	//Motores iniciais ligados 1, 3, 5, ..., 23
 	for(int i = 0; i < QUANTIDADE_MAXIMA_MOTORES_LIGADOS; i++)
 	{
 		controladores[2*i+1].set_velocidade_referencia(VELOCIDADE_INICIAL);
 	}
+	*/
 	
 	temporizador = new boost::asio::steady_timer(contexto, TEMPO_ATUALIZAR_CONTROLE);
 	temporizador->async_wait(boost::bind(atualizar_tensao_controle, boost::asio::placeholders::error, temporizador));
