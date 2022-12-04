@@ -12,6 +12,9 @@ const double Jm = 4.5e-7; // Momento de inércia
 const double B = 3.95e-5; // Atrito viscoso
 const double Kb = 0.0132; //Constante elétrica
 
+
+const double EPSON_MIN = 1e-8;
+
 double Motor::get_velocidade_atual()
 {
 	return velocidade_atual;
@@ -44,6 +47,11 @@ double Motor::atualizar_velocidade(double delta_tempo, double tensao_entrada)
 
 	// std::cout << "velocidade: " << velocidade_atual << std::endl;
 	// std::cout << "toque: " << toque_atual << std::endl;
+
+	// Esse if é para zerar o motor 
+	// Já que mesmo sem tensão ele ficava na velocidade 2.24014e-319
+	// E nunca zerava
+	if(velocidade_atual <  EPSON_MIN) velocidade_atual = 0;
 
 	return velocidade_atual;
 
