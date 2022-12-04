@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <mutex>
+#include <unistd.h>
 
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
@@ -12,7 +13,8 @@
 #include "Util.hpp"
 #include "CaixaMensagem.hpp"
 
-fork();
+
+pid_t pid;
 
 const int QUANTIDADE_MOTORES = 30;
 const int QUANTIDADE_MAXIMA_MOTORES_LIGADOS = 12;
