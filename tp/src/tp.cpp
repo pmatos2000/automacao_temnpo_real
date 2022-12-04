@@ -12,8 +12,6 @@
 #include "Util.hpp"
 #include "CaixaMensagem.hpp"
 
-
-
 const int QUANTIDADE_MOTORES = 30;
 const int QUANTIDADE_MAXIMA_MOTORES_LIGADOS = 12;
 
