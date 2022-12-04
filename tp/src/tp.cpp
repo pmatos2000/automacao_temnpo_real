@@ -2,6 +2,7 @@
 #include <thread>
 #include <vector>
 #include <fstream>
+#include <mutex>
 
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
@@ -10,7 +11,6 @@
 #include "Controlador.hpp"
 #include "Util.hpp"
 
-#include <unistd.h>
 
 
 const int QUANTIDADE_MOTORES = 30;
@@ -31,6 +31,8 @@ using namespace std;
 static vector<Motor> motores(30);
 static vector<Controlador> controladores(30);
 
+mutex mtx_dados_motores;
+
 boost::asio::io_context contexto;
 
 void simular_motor(boost::system::error_code /*e*/, boost::asio::steady_timer* temporizador, int index_motor, double tempo_ultima_atualizacao)
@@ -38,14 +40,20 @@ void simular_motor(boost::system::error_code /*e*/, boost::asio::steady_timer* t
 	//ADICIONAR RESTICAO DE ESPERAR ATUALIZAR OS CONTROLADORES
 	//ADICIONAR RESTRICAO DE ESPERAR TERMINAR DE FAZER LOG
 
+	// cout << "Simulando motor id: " << index_motor << endl;
+	
 	const double tempo_atual = Util::obter_tempo();
 	const double delta_tempo =  Util::calcular_delta_tempo(tempo_ultima_atualizacao, tempo_atual);
 
 	const double tensao_entrada = controladores[index_motor].obter_tensao_atual();
-	motores[index_motor].atualizar_velocidade(delta_tempo, tensao_entrada);
 	
+	mtx_dados_motores.lock();
+	motores[index_motor].atualizar_velocidade(delta_tempo, tensao_entrada);
+	mtx_dados_motores.unlock();
+
 	temporizador->expires_at(temporizador->expiry() + TEMPO_SIMULAR_MOTOR);
 	temporizador->async_wait(boost::bind(simular_motor, boost::asio::placeholders::error, temporizador, index_motor, tempo_atual));
+
 
 	// cout << index_motor << " " << delta_tempo  << " " << motores[index_motor].get_velocidade_atual() << endl;
 }
@@ -53,12 +61,13 @@ void simular_motor(boost::system::error_code /*e*/, boost::asio::steady_timer* t
 
 void atualizar_tensao_controle(boost::system::error_code /*e*/, boost::asio::steady_timer* temporizador)
 {
-	//COmecar a rotina se não tiver nenhum motor sendo atualizado
+	mtx_dados_motores.lock();
 	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
 	{
 		double tensao_atual =  motores[i].get_velocidade_atual();
 		controladores[i].atualizar_tensao(tensao_atual);
 	}
+	mtx_dados_motores.unlock();
 
 	temporizador->expires_at(temporizador->expiry() + TEMPO_ATUALIZAR_CONTROLE);
 	temporizador->async_wait(boost::bind(atualizar_tensao_controle, boost::asio::placeholders::error, temporizador));
@@ -74,13 +83,17 @@ void log_dados(boost::system::error_code /*e*/, boost::asio::steady_timer* tempo
 	const double delta_tempo =  Util::calcular_delta_tempo(tempo_inicial, tempo_atual);
 
 	stringstream ss;
-
+	
+	mtx_dados_motores.lock();
 	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
 	{
 			ss << i << ' ' << delta_tempo << ' ' << motores[i].get_velocidade_atual() << endl;
 	}
-
+	mtx_dados_motores.unlock();
+	
 	(*arquivo) << ss.rdbuf();
+
+	cout << ss.str();
 
 	temporizador->expires_at(temporizador->expiry() + TEMPO_ESCREVER_LOG);
 	temporizador->async_wait(boost::bind(log_dados, boost::asio::placeholders::error, temporizador, arquivo, tempo_inicial));
