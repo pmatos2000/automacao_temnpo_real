@@ -38,17 +38,12 @@ mutex mtx_caixa_mensagem;
 boost::asio::io_context contexto;
 
 void simular_motor(boost::system::error_code /*e*/, boost::asio::steady_timer* temporizador, int index_motor, double tempo_ultima_atualizacao)
-{
-	//ADICIONAR RESTICAO DE ESPERAR ATUALIZAR OS CONTROLADORES
-	//ADICIONAR RESTRICAO DE ESPERAR TERMINAR DE FAZER LOG
-
-	// cout << "Simulando motor id: " << index_motor << endl;
-	
-	const double tempo_atual = Util::obter_tempo();
-	const double delta_tempo =  Util::calcular_delta_tempo(tempo_ultima_atualizacao, tempo_atual);
-
+{	
 	mtx_dados_motores.lock();
 	mtx_dados_controladores.lock();
+
+	const double tempo_atual = Util::obter_tempo();
+	const double delta_tempo =  Util::calcular_delta_tempo(tempo_ultima_atualizacao, tempo_atual);
 	
 	const double tensao_entrada = controladores[index_motor].obter_tensao_atual();
 	motores[index_motor].atualizar_velocidade(delta_tempo, tensao_entrada);
@@ -113,15 +108,10 @@ void atualizar_tensao_controle(boost::system::error_code /*e*/, boost::asio::ste
 
 void log_dados(boost::system::error_code /*e*/, boost::asio::steady_timer* temporizador, ofstream *arquivo, double tempo_inicial)
 {
-	//ADICIONAR UM BLOQUEIO PARA ESSE MÈTODO SÒ EXECUTAR SE ELE NÂO TIVER EM EXECUCAO
-	//ADICIONAR RESTRICAO DE ESPERAR TODOS MOTORES ESPERAR
-	
+	mtx_dados_motores.lock();
 	const double tempo_atual = Util::obter_tempo();
 	const double delta_tempo =  Util::calcular_delta_tempo(tempo_inicial, tempo_atual);
-
 	stringstream ss;
-	
-	mtx_dados_motores.lock();
 	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
 	{
 			ss << i << ' ' << delta_tempo << ' ' << motores[i].get_velocidade_atual() << endl;
