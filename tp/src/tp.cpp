@@ -202,7 +202,6 @@ int main(void)
 	contexto.run();
 	interface_thead.join();
 
-
 	arquivo.close();
 	for(auto &t: lista_temporizador)
 	{
