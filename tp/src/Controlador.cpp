@@ -23,12 +23,7 @@ void Controlador::atualizar_tensao(double valor_medido)
 bool Controlador::verificar_controle_ativo()
 {
     double delta_tempo = Util::calcular_delta_tempo(inicio_controle, Util::obter_tempo());
-    if( velocidade_referencia == 0 || delta_tempo >= TEMPO_MAXIMO_CONTROLE)
-    {
-        cout << "DESATIVO" << endl;
-        return false;
-    }
-    cout << "ATIVO" << endl;
+    if( velocidade_referencia == 0 || delta_tempo >= TEMPO_MAXIMO_CONTROLE) return false;
     return true;
 }
 

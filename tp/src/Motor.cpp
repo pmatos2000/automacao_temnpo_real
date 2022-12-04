@@ -22,7 +22,6 @@ double Motor::get_velocidade_atual()
 
 double derivada_toque(double tal_m, double wm, double V)
 {
-
 	return (Km * V - Km * Kb * wm - Ra*tal_m);
 }
 
@@ -30,7 +29,6 @@ double derivada_velocidade(double tal_m, double wm)
 {
 	return (tal_m - tal_L - B * wm)/Jm;
 }
-
 
 
 double Motor::atualizar_velocidade(double delta_tempo, double tensao_entrada)
@@ -79,5 +77,4 @@ double Motor::atualizar_velocidade(double delta_tempo, double tensao_entrada)
 	velocidade_atual += delta_t * (k1_velocidade + 2 * k2_velocidade + 2 * k3_velocidade + k4_velocidade)/6;
 	tempo_ultima_atualizacao = tempo;
 	*/
-
 }

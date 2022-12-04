@@ -116,7 +116,6 @@ int main(void)
 	boost::asio::steady_timer* temporizador = 0;
 	double tempo_inicial = Util::obter_tempo();
 	
-
 	for(int i = 0; i < QUANTIDADE_MOTORES; i++)
 	{
 		temporizador = new boost::asio::steady_timer(contexto, TEMPO_SIMULAR_MOTOR);
@@ -139,7 +138,9 @@ int main(void)
 	lista_temporizador.push_back(temporizador);
 
 	thread interface_thead(interface);	
+	
 	contexto.run();
+	interface_thead.join();
 
 
 	arquivo.close();
