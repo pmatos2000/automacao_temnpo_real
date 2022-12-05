@@ -9,4 +9,7 @@ class Controlador
         void atualizar_tensao(double valor_medido);
         bool verificar_controle_ativo();
         double obter_tensao_atual();
+        double get_velocidade_referencia();
+        Controlador();
 };
+

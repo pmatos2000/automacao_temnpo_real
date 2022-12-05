@@ -14,8 +14,6 @@
 #include "CaixaMensagem.hpp"
 
 
-pid_t pid;
-
 const int QUANTIDADE_MOTORES = 30;
 const int QUANTIDADE_MAXIMA_MOTORES_LIGADOS = 12;
 
@@ -212,6 +210,24 @@ int main(void)
 		delete t;
 	}
 	lista_temporizador.clear();
+
+	pid_t pid;
+	pid = fork();
+	if(pid == 1){
+
+		ofstream *arq;
+		ofstream arq("historiador.txt");
+		(*arq) << ss.rdbuf();
+
+		arq <<  motores[i].get_velocidade_atual();
+
+		double v_referencia;
+		v_referencia = controladores[dados_mensagem.id_motor].set_velocidade_referencia(dados_mensagem.velocidade_maxima/2);
+    	cin>> v_referencia;
+		*arq<< v_referencia;
+
+	arq.close();
+	}
 
 	return 0;
 }
